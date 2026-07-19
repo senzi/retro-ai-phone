@@ -14,8 +14,6 @@
 - 多会话历史、本地缓存、删除确认和 100 条短信容量模拟
 - 输入 `*#06#` 触发隐藏设备信息页面
 - Cloudflare Pages Function 转发 LLM 请求
-- 每个运行实例内按 IP 进行简单频率限制
-- `X-Silicon` 请求头、短时随机数和编码载荷校验
 
 ## 技术栈
 
@@ -99,84 +97,6 @@ npx wrangler pages dev dist --port 8788
 
 单独运行 `npm run dev` 只会启动 Vite 前端，不会运行 `/api/chat` 对应的 Pages Function。
 
-## 部署到 Cloudflare Pages
-
-推荐使用 Cloudflare Pages 的 GitHub 集成。连接成功后，每次推送到生产分支都会自动构建和部署。
-
-### 1. 推送代码到 GitHub
-
-确认仓库中不包含 `.dev.vars`，然后将代码推送到 GitHub。
-
-本项目仓库地址：<https://github.com/senzi/retro-ai-phone>
-
-### 2. 创建 Pages 项目
-
-1. 登录 Cloudflare Dashboard。
-2. 打开 **Workers & Pages**。
-3. 选择 **Create application → Pages → Connect to Git**。
-4. 授权 GitHub，并选择 `senzi/retro-ai-phone`。
-5. 选择生产分支，通常为 `main`。
-
-### 3. 设置构建参数
-
-填写以下内容：
-
-```text
-Framework preset: Vue
-Build command: npm run build
-Build output directory: dist
-Root directory: /
-```
-
-不需要单独配置 Functions 目录。Cloudflare Pages 会自动识别仓库根目录下的 `functions/`，并将 `functions/api/chat.ts` 部署为 `/api/chat`。
-
-### 4. 配置生产密钥
-
-进入 Pages 项目：
-
-```text
-Settings → Variables and Secrets → Add
-```
-
-新增：
-
-```text
-Name: DEEPSEEK_API_KEY
-Value: 你的 DeepSeek API Key
-Type: Secret / Encrypt
-```
-
-生产环境必须配置。需要测试预览分支的 AI 对话时，也要为 Preview 环境配置同名 Secret。
-
-保存后重新部署一次，使密钥绑定生效。
-
-### 5. 验证部署
-
-部署完成后打开 Cloudflare 提供的 `*.pages.dev` 地址，检查：
-
-1. 页面、像素字体和 favicon 正常加载。
-2. 新建会话后可以发送消息并收到 AI 回复。
-3. 浏览器刷新后，有用户消息的历史会话仍然存在。
-4. 直接向 `/api/chat` 发送普通 JSON 会得到 `X-Silicon` 校验失败，而网页内请求可以正常通过。
-
-## 部署评估
-
-当前版本已经满足 Cloudflare Pages 的基础部署条件：
-
-- `npm run build` 可以生成 `dist/`
-- Pages Function 可以通过 TypeScript 检查
-- 前端使用相对路径调用 `/api/chat`，无需配置跨域
-- API Key 只由服务端读取，不会打包进前端
-- `.dev.vars`、Wrangler 本地状态和构建目录均不会提交
-- 像素字体、离线词典和 favicon 均包含在构建产物中
-
-需要注意：
-
-- 当前限流使用 Function 实例内存，只适合轻量、防滥用的基础限制。Cloudflare 多实例之间不会共享计数；若必须严格保证每个用户每分钟两次，需要改用 Durable Objects 或集中式 KV/数据库方案。
-- `X-Silicon` 用于阻止随手构造请求，但浏览器端算法可以被分析，不能替代账号认证、Turnstile 或服务端访问控制。
-- 离线拼音词典会让前端压缩资源约为 760 KB，仍可正常部署到 Pages，但首次加载会比普通展示页稍大。
-- 聊天历史保存在当前浏览器的 `localStorage`，不会跨设备同步，清理浏览器数据后会丢失。
-
 ## 项目结构
 
 ```text
@@ -185,7 +105,6 @@ src/
   data/             离线拼音词典和许可文件
   input/            拼音与英文多击输入逻辑
   store/            手机、会话和导航状态
-  utils/            请求编码逻辑
 functions/
   api/chat.ts       Cloudflare Pages Function
 public/
@@ -193,12 +112,12 @@ public/
   favicon.svg       网站图标
 ```
 
-## 隐私与安全
+## 数据与隐私
 
 - 会话记录只保存在浏览器本地。
 - 只有用户实际发送过消息的会话才会保存。
-- DeepSeek API Key 只应配置在 `.dev.vars` 或 Cloudflare Secret 中。
-- 请勿将 `.dev.vars`、API Key 或 Cloudflare 凭据提交到 Git。
+- DeepSeek API Key 只应配置在本地 `.dev.vars` 中。
+- 请勿将 `.dev.vars` 或 API Key 提交到 Git。
 
 ## 许可与致谢
 
