@@ -4,7 +4,6 @@ interface ChatPayload { message?: string; history?: HistoryMessage[] }
 interface SiliconEnvelope { timestamp?: number; nonce?: string; data?: string }
 
 const SILICON_SALT = 'SE-W810C:2006/2026:RETRO-SILICON'
-const buckets = new Map<string, number[]>()
 const usedNonces = new Map<string, number>()
 
 function fnv1a(value: string): string {
@@ -62,12 +61,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: 'X-Silicon 校验失败。' }, { status: 403 })
   }
 
-  const now = Date.now()
-  const recent = (buckets.get(ip) || []).filter((time) => now - time < 60_000)
-  if (recent.length >= 2) {
-    return Response.json({ error: '每分钟最多发送 2 条消息，请稍后再试。' }, { status: 429 })
-  }
-
   try {
     const message = body.message?.trim()
     if (!message || message.length > 500) {
@@ -114,8 +107,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const data = await upstream.json() as { choices?: Array<{ message?: { content?: string } }> }
     const reply = data.choices?.[0]?.message?.content?.trim()
     if (!reply) throw new Error('上游没有返回内容')
-    recent.push(now)
-    buckets.set(ip, recent)
     return Response.json({ reply })
   } catch (error) {
     const message = error instanceof Error ? error.message : '服务暂时不可用'
