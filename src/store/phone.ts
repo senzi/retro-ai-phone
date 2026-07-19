@@ -251,7 +251,7 @@ export const usePhoneStore = defineStore('phone', () => {
       return
     }
     if (view.value === 'easterEgg') {
-      if (direction === 'center') view.value = 'home'
+      if (direction === 'center') window.open('https://weibo.com/u/7402396589', '_blank', 'noopener,noreferrer')
       return
     }
     if (view.value === 'menu' && direction === 'center') { menuIndex.value = 0; view.value = 'messagesMenu'; return }

@@ -91,15 +91,16 @@ watch(() => phone.scrollOffset, (current, previous) => {
     </template>
 
     <template v-else-if="phone.view === 'easterEgg'">
-      <div class="titlebar"><span>设备信息</span><small>*#06#</small></div>
+      <div class="titlebar"><span>隐藏频道</span><small>*#06#</small></div>
       <div class="egg-screen">
         <div class="egg-orbit"><i /><b>SE</b></div>
-        <strong>SECRET SERVICE</strong>
-        <p>彩蛋内容待定</p>
-        <small>W810C · AI EDITION</small>
-        <code>06 / 2006 / 2026</code>
+        <strong>你居然找到这里了！</strong>
+        <p>感谢体验这台<br>来自“未来”的老手机。</p>
+        <small>欢迎关注</small>
+        <a class="egg-profile" href="https://weibo.com/u/7402396589" target="_blank" rel="noopener noreferrer">@阿尼亚是安妮亞</a>
+        <code>W810C · AI EDITION</code>
       </div>
-      <div class="softkeys"><span>返回</span><span>确定</span></div>
+      <div class="softkeys"><span>返回</span><span>打开主页</span></div>
     </template>
 
     <template v-else-if="phone.view === 'menu'">
