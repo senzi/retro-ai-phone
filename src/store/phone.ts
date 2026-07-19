@@ -5,7 +5,7 @@ import { pinyinCandidates, recordPinyinChoice } from '../input/pinyin'
 import { createSiliconRequest } from '../utils/silicon'
 
 export type InputMode = '拼音' | 'abc' | '123'
-export type ViewName = 'boot' | 'home' | 'call' | 'easterEgg' | 'menu' | 'messagesMenu' | 'history' | 'deleteConfirm' | 'storage' | 'chat' | 'symbols'
+export type ViewName = 'boot' | 'home' | 'call' | 'easterEgg' | 'menu' | 'messagesMenu' | 'history' | 'deleteConfirm' | 'storage' | 'clearConfirm' | 'chat' | 'symbols'
 export interface Message { role: 'user' | 'assistant'; content: string; createdAt: number }
 export interface Conversation { id: string; title: string; createdAt: number; updatedAt: number; messages: Message[] }
 
@@ -58,6 +58,7 @@ export const usePhoneStore = defineStore('phone', () => {
   const historyIndex = ref(0)
   const symbolIndex = ref(0)
   const deleteChoice = ref<0 | 1>(0)
+  const clearChoice = ref<0 | 1>(0)
   const notice = ref('')
   const dialedNumber = ref('')
   const callStatus = ref<'idle' | 'failed'>('idle')
@@ -187,6 +188,8 @@ export const usePhoneStore = defineStore('phone', () => {
     }
     if (view.value === 'history') { requestDeleteConversation(); return }
     if (view.value === 'deleteConfirm') { view.value = 'history'; return }
+    if (view.value === 'storage') { requestClearAllMessages(); return }
+    if (view.value === 'clearConfirm') { view.value = 'storage'; return }
     if (view.value !== 'chat') { back(); return }
     if (sequence.value) {
       sequence.value = sequence.value.slice(0, -1)
@@ -234,6 +237,23 @@ export const usePhoneStore = defineStore('phone', () => {
     showNotice('会话已删除')
   }
 
+  function requestClearAllMessages() {
+    if (!messageCount.value) {
+      showNotice('消息存储已经是空的')
+      return
+    }
+    clearChoice.value = 0
+    view.value = 'clearConfirm'
+  }
+
+  function clearAllMessages() {
+    sessions.value = []
+    activeSessionId.value = ''
+    draft.value = ''
+    sequence.value = ''
+    showNotice('全部消息已清空')
+  }
+
   function selectMessagesMenu() {
     if (menuIndex.value === 0) newConversation()
     if (menuIndex.value === 1) { historyIndex.value = 0; view.value = 'history' }
@@ -277,6 +297,16 @@ export const usePhoneStore = defineStore('phone', () => {
       }
       return
     }
+    if (view.value === 'clearConfirm') {
+      if (direction === 'left' || direction === 'right' || direction === 'up' || direction === 'down') {
+        clearChoice.value = clearChoice.value === 0 ? 1 : 0
+      }
+      if (direction === 'center') {
+        if (clearChoice.value === 1) clearAllMessages()
+        view.value = 'storage'
+      }
+      return
+    }
     if (view.value === 'symbols') {
       const columns = 4
       if (direction === 'left') symbolIndex.value = (symbolIndex.value - 1 + SYMBOLS.length) % SYMBOLS.length
@@ -313,6 +343,7 @@ export const usePhoneStore = defineStore('phone', () => {
     else if (view.value === 'symbols') view.value = 'chat'
     else if (view.value === 'call' || view.value === 'easterEgg') view.value = 'home'
     else if (view.value === 'deleteConfirm') view.value = 'history'
+    else if (view.value === 'clearConfirm') view.value = 'storage'
     else if (view.value === 'chat') {
       const conversation = activeSession.value
       if (conversation && !conversation.messages.some((message) => message.role === 'user')) {
@@ -389,7 +420,7 @@ export const usePhoneStore = defineStore('phone', () => {
 
   return {
     view, mode, draft, sequence, sessions, messages, activeSession, loading, visibleReply, scrollOffset,
-    activeKey, candidates, candidateIndex, menuIndex, historyIndex, symbolIndex, deleteChoice, notice,
+    activeKey, candidates, candidateIndex, menuIndex, historyIndex, symbolIndex, deleteChoice, clearChoice, notice,
     dialedNumber, callStatus,
     messageCount, storagePercent, number, erase, navigate, back, primaryAction, cycleMode, openSymbols,
     specialKey,

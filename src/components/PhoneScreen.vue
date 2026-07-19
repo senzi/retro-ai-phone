@@ -161,7 +161,22 @@ watch(() => phone.scrollOffset, (current, previous) => {
         <div class="storage-bar"><i :style="{ width: `${phone.storagePercent}%` }" /></div>
         <small>按 AI 与我的消息总数统计</small>
       </div>
-      <div class="softkeys"><span>返回</span><span>{{ phone.storagePercent }}%</span></div>
+      <div class="softkeys three"><span>返回</span><span>C 清空</span><span>{{ phone.storagePercent }}%</span></div>
+    </template>
+
+    <template v-else-if="phone.view === 'clearConfirm'">
+      <div class="titlebar"><span>清空消息</span><small>确认</small></div>
+      <div class="confirm-screen">
+        <span class="warning-icon">!</span>
+        <b>清空全部消息？</b>
+        <p>所有历史会话和消息</p>
+        <small>清空后无法恢复</small>
+        <div class="confirm-actions">
+          <span :class="{ active: phone.clearChoice === 0 }">取消</span>
+          <span :class="{ active: phone.clearChoice === 1 }">清空</span>
+        </div>
+      </div>
+      <div class="softkeys three"><span>返回</span><span>C 取消</span><span>OK 确认</span></div>
     </template>
 
     <template v-else-if="phone.view === 'symbols'">
