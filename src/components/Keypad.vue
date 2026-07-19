@@ -51,7 +51,11 @@ const keys = [
 <template>
   <div class="controls">
     <div class="soft-row">
-      <button :class="{ pressed: phone.activeKey === 'back' }" aria-label="返回" @click="phone.back">↩</button>
+      <button :class="{ pressed: phone.activeKey === 'back' }" aria-label="返回" @click="phone.back">
+        <svg class="back-icon" viewBox="0 0 28 20" aria-hidden="true">
+          <path d="M11 4 5 10l6 6M6 10h11c4 0 6 2 6 5" />
+        </svg>
+      </button>
       <div class="dpad">
         <button class="up" :class="{ pressed: phone.activeKey === 'up' }" aria-label="向上" @click="phone.navigate('up')">▲</button>
         <button class="left" :class="{ pressed: phone.activeKey === 'left' }" aria-label="向左" @click="phone.navigate('left')">◀</button>
