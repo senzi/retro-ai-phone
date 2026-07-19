@@ -11,7 +11,7 @@ export interface Conversation { id: string; title: string; createdAt: number; up
 
 const modes: InputMode[] = ['拼音', 'abc', '123']
 const STORAGE_KEY = 'w810c-ai-conversations-v1'
-const MESSAGE_CAPACITY = 100
+export const MESSAGE_CAPACITY = 20
 export const SYMBOLS = ['.', ',', '?', '!', ':', ';', "'", '"', '(', ')', '[', ']', '@', '#', '$', '%', '+', '-', '×', '÷', '。', '，', '？', '！']
 
 function makeId(): string {

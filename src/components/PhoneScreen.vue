@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { usePhoneStore, SYMBOLS } from '../store/phone'
+import { usePhoneStore, MESSAGE_CAPACITY, SYMBOLS } from '../store/phone'
 import { pinyinHint } from '../input/pinyin'
 
 const phone = usePhoneStore()
@@ -115,7 +115,7 @@ watch(() => phone.scrollOffset, (current, previous) => {
     </template>
 
     <template v-else-if="phone.view === 'messagesMenu'">
-      <div class="titlebar"><span>AI 信息</span><small>{{ phone.messageCount }}/100</small></div>
+      <div class="titlebar"><span>AI 信息</span><small>{{ phone.messageCount }}/{{ MESSAGE_CAPACITY }}</small></div>
       <div class="list-screen">
         <div v-for="(item, index) in menuItems" :key="item" class="list-row" :class="{ active: index === phone.menuIndex }">
           <span class="list-icon">{{ ['＋', '▤', '▥'][index] }}</span><b>{{ item }}</b><i>›</i>
@@ -157,7 +157,7 @@ watch(() => phone.scrollOffset, (current, previous) => {
         <span class="storage-chip">▦</span>
         <b>消息存储</b>
         <p>已使用</p>
-        <strong>{{ phone.messageCount }}<small>/100 条</small></strong>
+        <strong>{{ phone.messageCount }}<small>/{{ MESSAGE_CAPACITY }} 条</small></strong>
         <div class="storage-bar"><i :style="{ width: `${phone.storagePercent}%` }" /></div>
         <small>按 AI 与我的消息总数统计</small>
       </div>
